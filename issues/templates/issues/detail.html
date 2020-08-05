@@ -1,0 +1,68 @@
+{% extends "layout/application.html" %}
+{% load humanize %}
+{% block content %}
+    <div class="issue-heading">
+        <div class="am-container">
+            {{ issue.title }}
+            {% if request.user.is_authenticated and request.user.id == issue.user_id %}
+            <a href="{% url 'issues:delete' issue.id %}" type="button" class="am-btn am-btn-danger am-radius am-btn-sm">Destroy</a>
+            <a href="{% url 'issues:change' issue.id %}" type="button"
+               class="am-btn am-btn-primary am-radius am-btn-sm">Edit</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="am-container">
+        <ul class="am-comments-list am-comments-list-flip">
+
+            <li class="am-comment">
+                <img src="/static/img/avatar1.png" alt="" class="am-comment-avatar" width="100" height="100">
+                <div class="am-comment-main">
+                    <header class="am-comment-hd">
+                        <div class="am-comment-meta">
+                            <span class="am-comment-author">{{ issue.user.username }}</span>
+                        </div>
+                    </header>
+                    <div class="am-comment-bd"><p>{{ issue.content }}</p></div>
+                </div>
+            </li>
+
+            {% for comment in issue.comment_set.all  %}
+            <li class="am-comment">
+                <img src="/static/img/avatar2.png" alt="" class="am-comment-avatar" width="48" height="48">
+
+                <div class="am-comment-main">
+                    <header class="am-comment-hd">
+                        <div class="am-comment-meta">
+                            <span class="am-comment-author">{{ comment.user.username }}</span>
+                            {{ comment.pub_at | naturaltime }}
+                        </div>
+                    </header>
+                    <div class="am-comment-bd"><p>{{ comment.content }}</p></div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+        {% if not request.user.is_authenticated %}
+            <a href="{% url 'users:sign_in' %}?next={% url 'issues:detail' issue.id %}">没登录说锤子呢</a>
+        {% else %}
+        <form class="am-form" method="post">
+            {% csrf_token %}
+            <h2>{{ request.user.username }}</h2>
+            <fieldset>
+
+                <div class="am-form-group">
+                    <textarea rows="5" name="content"></textarea>
+                </div>
+
+                <p>
+                    <button type="submit" class="am-btn am-btn-default">提交</button>
+                </p>
+            </fieldset>
+        </form>
+        {% endif %}
+
+
+    </div>
+{% endblock content %}
